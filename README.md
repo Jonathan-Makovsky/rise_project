@@ -1,15 +1,15 @@
 # rise_project
 Rise home assignment
 
-**Installations**
-Docker:
-Install Docker on your system. You can download it from Docker's official website.
-Docker download link: https://www.docker.com/products/docker-desktop/
+**Installations**  
+Docker:  
+Install Docker on your system. You can download it from Docker's official website.  
+Docker download link: https://www.docker.com/products/docker-desktop/  
 
-**Instructions for Running the Backend**
-Stop and Remove Existing Containers:
-If you have any running containers, stop and remove them with:
-**docker-compose down -v**
+**Instructions for Running the Backend**  
+Stop and Remove Existing Containers:  
+If you have any running containers, stop and remove them with:  
+**docker-compose down -v**  
 
 Build and start the application containers with:
 **docker-compose up --build**
