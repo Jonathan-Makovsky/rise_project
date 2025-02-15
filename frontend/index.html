@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhoneBook</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #ddd;
+        }
+        .section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>PhoneBook</h1>
+
+    <!-- Navigation Buttons -->
+    <button onclick="showSection('viewContacts')">📄 View Contacts</button>
+    <button onclick="showSection('addContact')">➕ Add Contact</button>
+    <button onclick="showSection('editContact')">✏️ Edit Contact</button>
+    <button onclick="showSection('deleteContact')">🗑️ Delete Contact</button>
+    <button onclick="showSection('searchContact')">🔍 Search Contact</button>
+
+    <!-- View Contacts Section -->
+    <div id="viewContacts" class="section">
+        <h2>View Contacts</h2>
+        <button onclick="loadContacts()">🔄 Refresh Contacts</button>
+        <table id="contactsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone Number</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Add Contact Section -->
+    <div id="addContact" class="section">
+        <h2>Add Contact</h2>
+        <input type="text" id="firstName" placeholder="First Name">
+        <input type="text" id="lastName" placeholder="Last Name">
+        <input type="text" id="phoneNumber" placeholder="Phone Number">
+        <input type="text" id="address" placeholder="Address">
+        <button onclick="addContact()">➕ Add</button>
+    </div>
+
+    <script>
+        // Show/hide sections dynamically
+        function showSection(section) {
+            document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+            document.getElementById(section).style.display = "block";
+        }
+
+        // Load contacts and display them in the table
+        async function loadContacts() {
+            const tableBody = document.querySelector("#contactsTable tbody");
+            tableBody.innerHTML = ""; // Clear table before loading new data
+
+            try {
+                const response = await fetch("http://localhost:8080/getContacts");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to fetch contacts.");
+                }
+
+                data.contacts.forEach(contact => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${contact.id}</td>
+                        <td>${contact.first_name}</td>
+                        <td>${contact.last_name}</td>
+                        <td>${contact.phone_number}</td>
+                        <td>${contact.address}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Add a new contact
+        async function addContact() {
+            const contact = {
+                first_name: document.getElementById("firstName").value,
+                last_name: document.getElementById("lastName").value,
+                phone_number: document.getElementById("phoneNumber").value,
+                address: document.getElementById("address").value,
+            };
+
+            try {
+                const response = await fetch("http://localhost:8080/addContact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(contact),
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Set the default section when the page loads
+        document.addEventListener("DOMContentLoaded", () => showSection("viewContacts"));
+    </script>
+</body>
+</html>
