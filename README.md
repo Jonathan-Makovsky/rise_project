@@ -1,7 +1,6 @@
 # rise_project
 Rise home assignment
 
-
 **Installations**
 Docker:
 Install Docker on your system. You can download it from Docker's official website.
