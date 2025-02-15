@@ -2,7 +2,10 @@ package src
 
 import (
 	"database/sql"
-	"fmt"
+    "fmt"
+    "log"
+    "regexp"
+
 )
 
 // Contact struct (matches database table columns)
@@ -117,3 +120,6 @@ func EditContact(db *sql.DB, phoneNumber string, updatedContact Contact) (int, e
 	}
 	return int(rowsAffected), nil
 }
+
+
+

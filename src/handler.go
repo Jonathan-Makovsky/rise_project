@@ -17,7 +17,7 @@ var paginationLock sync.Mutex
 // GetContactsHandler handles the HTTP request for retrieving contacts
 func GetContactsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const limit = 3
+		const limit = 10
 		paginationLock.Lock()
 		offset := paginationOffset
 		paginationOffset += limit
