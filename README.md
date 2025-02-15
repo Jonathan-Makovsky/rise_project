@@ -7,8 +7,8 @@ Rise home assignment
 
 **Instruction for running backend:**
 1. Stop and remove all containers: "**docker-compose down -v**"
-2. Docker build: "**docker-compose up --build**" 
-  **Usign UI:**
+2. Docker build: "**docker-compose up --build**"
+3. **Using UI:**
   Open the index.html file by your preferred web browser
 
 **Tests:**
