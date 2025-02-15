@@ -1,35 +1,17 @@
 #!/bin/bash
 
-# Define API base URL
-API_URL="http://localhost:8080"
+# Step 1: Start the Docker containers using Docker Compose
+echo "Starting Docker containers..."
+docker-compose up -d --build
 
-# Function to check HTTP response status
-check_response() {
-    url=$1
-    expected_code=$2
+# Step 2: Wait for the services to be up and running (you can adjust the sleep time)
+echo "Waiting for the services to be ready..."
+sleep 10
 
-    echo "Testing $url"
-    response_code=$(curl -s -o /dev/null -w "%{http_code}" $url)
+# Step 3: Run the test file for the backend API endpoints (adjust the test file command if needed)
+echo "Running the tests..."
+go test -v ./tests/end_to_end_test.go
 
-    if [ "$response_code" -ne "$expected_code" ]; then
-        echo "Error: Expected status $expected_code, got $response_code"
-        exit 1
-    else
-        echo "Success: Got expected status $response_code"
-    fi
-}
-
-# Test 1: Check if the /getContacts endpoint returns a 200 status code
-echo "Testing GET /getContacts"
-check_response "$API_URL/getContacts" 200
-
-# Optional: Check if the response contains contacts data (if necessary)
-response=$(curl -s "$API_URL/getContacts")
-if [[ "$response" == *"contacts"* ]]; then
-    echo "Success: Contacts data found in response"
-else
-    echo "Error: No contacts found in the response"
-    exit 1
-fi
-
-echo "Test 1 completed successfully."
+# Step 4: Shut down the Docker containers after the tests have completed
+echo "Shutting down Docker containers..."
+docker-compose down
