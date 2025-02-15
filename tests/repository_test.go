@@ -9,7 +9,7 @@ import (
     "testing"
     "database/sql"
     "github.com/DATA-DOG/go-sqlmock"
-    "Rise/src" // Update with your project's path
+    "Rise/src" 
 )
 
 // Test function to run all tests
