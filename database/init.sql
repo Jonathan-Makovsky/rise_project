@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 -- I added some rows to the table, so we had something to work with
 INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES
     ('Jonathan', 'Makovsky', '0543435590', 'Tel Aviv'),
-    ('Jonathan', 'Makovsky', '0543435590', '1'),
-    ('Jonathan', 'Makovsky', '0543435590', '2'),
+    ('Jonathan', 'Makovsky', '0543435590', 'Jerusalem'),
+    ('Jonathan', 'Makovsky', '0543435590', 'Eilat'),
     ('Jonathan', 'Makovsky', '1', 'Tel Aviv'),
     ('Jonathan', 'Makovsky', '2', 'Tel Aviv');
