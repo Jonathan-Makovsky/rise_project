@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Importing PostgreSQL driver for SQL database interaction
 
-	"Rise/src" // Import custom source code for handlers
+	"Rise/src" // Import my source code
 )
 
 

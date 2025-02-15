@@ -4,21 +4,22 @@ package tests
 
 import (
     "fmt"
-    "log"
     "regexp"
     "testing"
-    "database/sql"
     "github.com/DATA-DOG/go-sqlmock"
     "Rise/src" 
-)
-
+) 
 // Test function to run all tests
 func TestRepository(t *testing.T) {
     t.Run("Test Add, Search, Delete Contact", testAddSearchDeleteContact)
     t.Run("Test Pagination with Multiple Contacts", testPaginationWithMultipleContacts)
     t.Run("Test Add and Delete Contacts", testAddDeleteContacts)
+    t.Run("Test add and edit Contacts", testEditContact)
+
+    
 }
 
+// Test adding, searching, and deleting a contact
 // Test adding, searching, and deleting a contact
 func testAddSearchDeleteContact(t *testing.T) {
     db, mock, err := sqlmock.New()
@@ -27,28 +28,28 @@ func testAddSearchDeleteContact(t *testing.T) {
     }
     defer db.Close()
 
-    newContact := your_project_path.Contact{
+    newContact := src.Contact{
         FirstName:   "Jonathan",
         LastName:    "Makovsky",
         PhoneNumber: "0543435590",
         Address:     "Tel Aviv",
     }
 
+    // Mock the insert query
     mock.ExpectQuery(regexp.QuoteMeta(
         "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
-    )).
-        WithArgs(newContact.FirstName, newContact.LastName, newContact.PhoneNumber, newContact.Address).
+    )).WithArgs(newContact.FirstName, newContact.LastName, newContact.PhoneNumber, newContact.Address).
         WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
-    id, err := your_project_path.AddContact(db, newContact)
+    // Add the contact and check for errors
+    id, err := src.AddContact(db, newContact)
     if err != nil {
         t.Fatalf("Failed to add contact: %v", err)
     }
     newContact.ID = id
 
-    mock.ExpectQuery(regexp.QuoteMeta(
-        "SELECT COUNT(*) FROM contacts",
-    )).
+    // Mock the query to count contacts
+    mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM contacts")).
         WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
 
     row := db.QueryRow("SELECT COUNT(*) FROM contacts")
@@ -60,14 +61,15 @@ func testAddSearchDeleteContact(t *testing.T) {
         t.Fatalf("Expected 1 contact, found %d", count)
     }
 
+    // Mock the search query by phone number
     mock.ExpectQuery(regexp.QuoteMeta(
         "SELECT id, first_name, last_name, phone_number, address FROM contacts WHERE phone_number = $1",
-    )).
-        WithArgs(newContact.PhoneNumber).
+    )).WithArgs(newContact.PhoneNumber).
         WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name", "phone_number", "address"}).
             AddRow(newContact.ID, newContact.FirstName, newContact.LastName, newContact.PhoneNumber, newContact.Address))
 
-    contacts, err := your_project_path.SearchContact(db, newContact.PhoneNumber)
+    // Search for the contact and check the result
+    contacts, err := src.SearchContact(db, newContact.PhoneNumber)
     if err != nil {
         t.Fatalf("Failed to search contact: %v", err)
     }
@@ -75,13 +77,14 @@ func testAddSearchDeleteContact(t *testing.T) {
         t.Fatalf("Expected contact %+v, got %+v", newContact, contacts[0])
     }
 
+    // Mock the delete query
     mock.ExpectExec(regexp.QuoteMeta(
         "DELETE FROM contacts WHERE phone_number = $1",
-    )).
-        WithArgs(newContact.PhoneNumber).
+    )).WithArgs(newContact.PhoneNumber).
         WillReturnResult(sqlmock.NewResult(0, 1))
 
-    deletedCount, err := your_project_path.DeleteContact(db, newContact.PhoneNumber)
+    // Delete the contact and check for success
+    deletedCount, err := src.DeleteContact(db, newContact.PhoneNumber)
     if err != nil {
         t.Fatalf("Failed to delete contact: %v", err)
     }
@@ -89,9 +92,8 @@ func testAddSearchDeleteContact(t *testing.T) {
         t.Fatalf("Expected to delete 1 contact, deleted %d", deletedCount)
     }
 
-    mock.ExpectQuery(regexp.QuoteMeta(
-        "SELECT COUNT(*) FROM contacts",
-    )).
+    // Mock the query to check the count of contacts after deletion
+    mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM contacts")).
         WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 
     row = db.QueryRow("SELECT COUNT(*) FROM contacts")
@@ -102,6 +104,7 @@ func testAddSearchDeleteContact(t *testing.T) {
         t.Fatalf("Expected 0 contacts, found %d", count)
     }
 
+    // Ensure all mock expectations were met
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Fatalf("There were unfulfilled expectations: %s", err)
     }
@@ -115,9 +118,9 @@ func testPaginationWithMultipleContacts(t *testing.T) {
     }
     defer db.Close()
 
-    var contactsToAdd []your_project_path.Contact
+    var contactsToAdd []src.Contact
     for i := 1; i <= 25; i++ {
-        contactsToAdd = append(contactsToAdd, your_project_path.Contact{
+        contactsToAdd = append(contactsToAdd, src.Contact{
             FirstName:   fmt.Sprintf("FirstName%d", i),
             LastName:    fmt.Sprintf("LastName%d", i),
             PhoneNumber: fmt.Sprintf("12345678%02d", i),
@@ -128,11 +131,10 @@ func testPaginationWithMultipleContacts(t *testing.T) {
     for i, contact := range contactsToAdd {
         mock.ExpectQuery(regexp.QuoteMeta(
             "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
-        )).
-            WithArgs(contact.FirstName, contact.LastName, contact.PhoneNumber, contact.Address).
+        )).WithArgs(contact.FirstName, contact.LastName, contact.PhoneNumber, contact.Address).
             WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(i + 1))
 
-        id, err := your_project_path.AddContact(db, contact)
+        id, err := src.AddContact(db, contact)
         if err != nil {
             t.Fatalf("Failed to add contact: %v", err)
         }
@@ -159,16 +161,21 @@ func testPaginationWithMultipleContacts(t *testing.T) {
         }
         mock.ExpectQuery(regexp.QuoteMeta(
             "SELECT id, first_name, last_name, phone_number, address FROM contacts LIMIT $1 OFFSET $2",
-        )).
-            WithArgs(limit, offset).
+        )).WithArgs(limit, offset).
             WillReturnRows(rows)
 
-        retrievedContacts, message, err := your_project_path.GetContacts(db, limit, offset)
+        // Correct variable assignment
+        contacts, message, err := src.GetContacts(db, limit, offset)
         if err != nil {
             t.Fatalf("Failed to retrieve contacts: %v", err)
         }
-        if len(retrievedContacts) != expectedCount {
-            t.Fatalf("Expected to retrieve %d contacts, but got %d", expectedCount, len(retrievedContacts))
+        if len(contacts) != expectedCount {
+            t.Fatalf("Expected to retrieve %d contacts, but got %d", expectedCount, len(contacts))
+        }
+
+        // Optionally, handle the message if needed
+        if message != "" {
+            fmt.Printf("Message: %s\n", message)
         }
     }
 
@@ -185,7 +192,7 @@ func testAddDeleteContacts(t *testing.T) {
     }
     defer db.Close()
 
-    contactsToAdd := []your_project_path.Contact{
+    contactsToAdd := []src.Contact{
         {FirstName: "Alice", LastName: "Smith", PhoneNumber: "1111111111", Address: "123 Maple St"},
         {FirstName: "Bob", LastName: "Johnson", PhoneNumber: "2222222222", Address: "456 Oak St"},
     }
@@ -197,7 +204,7 @@ func testAddDeleteContacts(t *testing.T) {
             WithArgs(contact.FirstName, contact.LastName, contact.PhoneNumber, contact.Address).
             WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(i + 1))
 
-        id, err := your_project_path.AddContact(db, contact)
+        id, err := src.AddContact(db, contact)
         if err != nil {
             t.Fatalf("Failed to add contact: %v", err)
         }
@@ -210,7 +217,7 @@ func testAddDeleteContacts(t *testing.T) {
         WithArgs(contactsToAdd[0].PhoneNumber).
         WillReturnResult(sqlmock.NewResult(0, 1))
 
-    deletedCount, err := your_project_path.DeleteContact(db, contactsToAdd[0].PhoneNumber)
+    deletedCount, err := src.DeleteContact(db, contactsToAdd[0].PhoneNumber)
     if err != nil {
         t.Fatalf("Failed to delete contact: %v", err)
     }
@@ -219,6 +226,72 @@ func testAddDeleteContacts(t *testing.T) {
         t.Fatalf("Expected to delete 1 contact, deleted %d", deletedCount)
     }
 
+    if err := mock.ExpectationsWereMet(); err != nil {
+        t.Fatalf("There were unfulfilled expectations: %s", err)
+    }
+}
+
+// Test editing a contact
+func testEditContact(t *testing.T) {
+    db, mock, err := sqlmock.New()
+    if err != nil {
+        t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+    }
+    defer db.Close()
+
+    // Step 1: Add a contact
+    newContact := src.Contact{
+        FirstName:   "Jonathan",
+        LastName:    "Makovsky",
+        PhoneNumber: "0543435590",
+        Address:     "Tel Aviv",
+    }
+
+    mock.ExpectQuery(regexp.QuoteMeta(
+        "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
+    )).WithArgs(newContact.FirstName, newContact.LastName, newContact.PhoneNumber, newContact.Address).
+        WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+    id, err := src.AddContact(db, newContact)
+    if err != nil {
+        t.Fatalf("Failed to add contact: %v", err)
+    }
+    newContact.ID = id
+
+    // Step 2: Attempt to edit someone's phone number (not possible)
+    otherPhoneNumber := "0543435591"
+    updatedContact := src.Contact{
+        FirstName:   "Jonathan",
+        LastName:    "Makovsky",
+        PhoneNumber: otherPhoneNumber, // Someone else's phone number
+        Address:     "New Address",
+    }
+
+    mock.ExpectExec(regexp.QuoteMeta(
+        "UPDATE contacts SET first_name = $1, last_name = $2, phone_number = $3, address = $4 WHERE phone_number = $5",
+    )).WithArgs(updatedContact.FirstName, updatedContact.LastName, updatedContact.PhoneNumber, updatedContact.Address, newContact.PhoneNumber).
+        WillReturnResult(sqlmock.NewResult(0, 0)) // No rows affected (not possible)
+
+    // Try to edit with a different phone number, should not succeed
+    rowsUpdated, err := src.EditContact(db, newContact.PhoneNumber, updatedContact)
+    if err == nil || rowsUpdated != 0 {
+        t.Fatalf("Expected no rows to be updated when editing a non-existent contact, but got %d rows", rowsUpdated)
+    }
+
+    // Step 3: Try to edit the same contact's phone number (should succeed)
+    updatedContact.PhoneNumber = newContact.PhoneNumber // Correct the phone number to match
+    mock.ExpectExec(regexp.QuoteMeta(
+        "UPDATE contacts SET first_name = $1, last_name = $2, phone_number = $3, address = $4 WHERE phone_number = $5",
+    )).WithArgs(updatedContact.FirstName, updatedContact.LastName, updatedContact.PhoneNumber, updatedContact.Address, newContact.PhoneNumber).
+        WillReturnResult(sqlmock.NewResult(1, 1)) // 1 row updated
+
+    // Now edit with the correct phone number
+    rowsUpdated, err = src.EditContact(db, newContact.PhoneNumber, updatedContact)
+    if err != nil || rowsUpdated != 1 {
+        t.Fatalf("Expected 1 row to be updated when editing the contact, but got %d rows", rowsUpdated)
+    }
+
+    // Ensure all mock expectations were met
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Fatalf("There were unfulfilled expectations: %s", err)
     }

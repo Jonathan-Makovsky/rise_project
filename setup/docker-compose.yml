@@ -29,6 +29,7 @@ services:
       - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - phonebook-network
+  
 
 volumes:
   postgres-data:
