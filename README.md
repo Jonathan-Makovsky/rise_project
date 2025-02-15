@@ -7,6 +7,7 @@ Install Docker on your system. You can download it from Docker's official websit
 Docker download link: https://www.docker.com/products/docker-desktop/  
 
 **Instructions for Running the Backend**  
+Inside **/setup** folder  
 Stop and Remove Existing Containers:  
 If you have any running containers, stop and remove them with:  
 **docker-compose down -v**  
