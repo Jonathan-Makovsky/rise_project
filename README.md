@@ -24,7 +24,7 @@ To run unit tests for the repository functions, run:
 **go test tests/repository_test.go**
 
 End-to-End Tests:
-These tests run automatically with Docker Compose
+These tests by
 
 **Programming Languages and Technologies**
 Backend: Go (Golang)
@@ -45,7 +45,9 @@ Rise/
 ├── frontend/              # UI files
 │   └── index.html         # Frontend HTML file
 ├── tests/                 # Test files
-│   └── repository_test.go # Unit tests for repository functions
+│   ├── repository_test.go # Unit tests for repository functions
+│   ├── docker_tests.bat   # Batch script to run Docker and tests
+│   └── end_to_end_test.go # End-to-end tests for API functionality
 ├── main.go                # Entry point for the API server and routes
 ├── go.mod                 # Go module dependencies
 ├── go.sum                 # Go module checksum
