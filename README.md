@@ -36,7 +36,7 @@ Database: SQL (PostgreSQL)
 Rise/  
 ├── src/ # Source files  
 │ ├── handler.go # API handler functions for CRUD operations  
-│ └── repository.go # Database interaction functions
+│ └── repository.go # Database interaction functions  
 ├── setup/ # Docker setup files  
 │ ├── Dockerfile # Dockerfile for building the application container  
 │ └── docker-compose.yml # Docker Compose configuration for services  
