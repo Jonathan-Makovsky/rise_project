@@ -3,8 +3,6 @@ package src
 import (
 	"database/sql"
     "fmt"
-    "log"
-    "regexp"
 
 )
 

@@ -12,6 +12,25 @@ import (
 	"Rise/src"
 )
 
+
+// CORS Middleware
+func enableCORS(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*") // Change * to your frontend URL for security
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+        // Handle preflight requests
+        if r.Method == "OPTIONS" {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+	})
+}
+
+
 func main() {
 	// Database connection setup
 	dbURL := os.Getenv("DATABASE_URL")
@@ -36,7 +55,10 @@ func main() {
 	r.HandleFunc("/searchContact/{phone_number}", src.SearchContactHandler(db)).Methods("GET")
 	r.HandleFunc("/editContact/{phone_number}", src.EditContactHandler(db)).Methods("PUT")
 
-	// Start server
-	log.Printf("Server starting on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	// Wrap router with CORS middleware
+    handler := enableCORS(r)
+
+    // Start server
+    log.Printf("Server starting on port 8080...")
+    log.Fatal(http.ListenAndServe(":8080", handler))
 }

@@ -36,6 +36,9 @@
         .section {
             display: none;
         }
+        .input-container {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +79,36 @@
         <button onclick="addContact()">➕ Add</button>
     </div>
 
+    <!-- Search Contact Section -->
+    <div id="searchContact" class="section">
+        <h2>Search Contact</h2>
+        <div class="input-container">
+            <input type="text" id="searchPhoneNumber" placeholder="Enter Phone Number to Search">
+            <button onclick="searchContact()">🔍 Search</button>
+        </div>
+        <table id="searchResults">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone Number</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Delete Contact Section -->
+    <div id="deleteContact" class="section">
+        <h2>Delete Contact</h2>
+        <div class="input-container">
+            <input type="text" id="deletePhoneNumber" placeholder="Enter Phone Number to Delete">
+            <button onclick="deleteContact()">🗑️ Delete</button>
+        </div>
+    </div>
+
     <script>
         // Show/hide sections dynamically
         function showSection(section) {
@@ -83,7 +116,7 @@
             document.getElementById(section).style.display = "block";
         }
 
-        // Load contacts and display them in the table
+        // Load contacts and display in table
         async function loadContacts() {
             const tableBody = document.querySelector("#contactsTable tbody");
             tableBody.innerHTML = ""; // Clear table before loading new data
@@ -127,6 +160,49 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(contact),
                 });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Search contact by phone number
+        async function searchContact() {
+            const phoneNumber = document.getElementById("searchPhoneNumber").value;
+            const tableBody = document.querySelector("#searchResults tbody");
+            tableBody.innerHTML = ""; // Clear table before loading new data
+
+            try {
+                const response = await fetch(`http://localhost:8080/searchContact/${phoneNumber}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to search contacts.");
+                }
+                alert(data.message);
+                data.contacts.forEach(contact => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${contact.id}</td>
+                        <td>${contact.first_name}</td>
+                        <td>${contact.last_name}</td>
+                        <td>${contact.phone_number}</td>
+                        <td>${contact.address}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Delete a contact
+        async function deleteContact() {
+            const phoneNumber = document.getElementById("deletePhoneNumber").value;
+
+            try {
+                const response = await fetch(`http://localhost:8080/deleteContact/${phoneNumber}`, { method: "DELETE" });
                 const result = await response.json();
                 alert(result.message);
             } catch (error) {

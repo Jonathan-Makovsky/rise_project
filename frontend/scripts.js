@@ -4,7 +4,7 @@ function showSection(section) {
     document.getElementById(section).style.display = "block";
 }
 
-// Load contacts and display in table
+// Load contacts and display them in the table
 async function loadContacts() {
     const tableBody = document.querySelector("#contactsTable tbody");
     tableBody.innerHTML = ""; // Clear table before loading new data
@@ -55,43 +55,7 @@ async function addContact() {
     }
 }
 
-// Edit an existing contact
-async function editContact() {
-    const phoneNumber = document.getElementById("editPhoneNumber").value;
-    const updatedContact = {
-        first_name: document.getElementById("newFirstName").value,
-        last_name: document.getElementById("newLastName").value,
-        phone_number: phoneNumber, // Keep the same phone number
-        address: document.getElementById("newAddress").value,
-    };
-
-    try {
-        const response = await fetch(`http://localhost:8080/editContact/${phoneNumber}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedContact),
-        });
-        const result = await response.json();
-        alert(result.message);
-    } catch (error) {
-        alert("Error: " + error.message);
-    }
-}
-
-// Delete a contact
-async function deleteContact() {
-    const phoneNumber = document.getElementById("deletePhoneNumber").value;
-
-    try {
-        const response = await fetch(`http://localhost:8080/deleteContact/${phoneNumber}`, { method: "DELETE" });
-        const result = await response.json();
-        alert(result.message);
-    } catch (error) {
-        alert("Error: " + error.message);
-    }
-}
-
-// Search for a contact
+// Search contact by phone number
 async function searchContact() {
     const phoneNumber = document.getElementById("searchPhoneNumber").value;
     const tableBody = document.querySelector("#searchResults tbody");
@@ -99,27 +63,84 @@ async function searchContact() {
 
     try {
         const response = await fetch(`http://localhost:8080/searchContact/${phoneNumber}`);
-        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || "Failed to search contacts.");
+            throw new Error("Failed to search contacts.");
         }
 
-        data.contacts.forEach(contact => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${contact.id}</td>
-                <td>${contact.first_name}</td>
-                <td>${contact.last_name}</td>
-                <td>${contact.phone_number}</td>
-                <td>${contact.address}</td>
-            `;
-            tableBody.appendChild(row);
-        });
+        const data = await response.json();
+
+        // If the backend returns a message (no contact found)
+        if (data.message) {
+            // Show the message in the table
+            const noResultsRow = document.createElement("tr");
+            noResultsRow.innerHTML = `<td colspan="5" style="text-align: center;">${data.message}</td>`;
+            tableBody.appendChild(noResultsRow);
+        } else {
+            // If contacts are found, display them
+            data.contacts.forEach(contact => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${contact.id}</td>
+                    <td>${contact.first_name}</td>
+                    <td>${contact.last_name}</td>
+                    <td>${contact.phone_number}</td>
+                    <td>${contact.address}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
     } catch (error) {
         alert("Error: " + error.message);
     }
 }
 
-// Set the default section when the page loads
+// Delete a contact (same logic for showing messages as search)
+async function deleteContact() {
+    const phoneNumber = document.getElementById("deletePhoneNumber").value;
+
+    try {
+        const response = await fetch(`http://localhost:8080/deleteContact/${phoneNumber}`, { method: "DELETE" });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to delete contact.");
+        }
+
+        alert(data.message);
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
+// Event listeners for buttons
+
+// Fetch contacts when "Get Contacts" button is clicked
+document.getElementById("getContactsBtn").addEventListener("click", function() {
+    loadContacts();
+});
+
+// Add a new contact when "Add Contact" button is clicked
+document.getElementById("addContactBtn").addEventListener("click", function() {
+    addContact();
+});
+
+// Delete contact when "Delete Contact" button is clicked
+document.getElementById("deleteContactBtn").addEventListener("click", function() {
+    const phoneNumber = prompt("Enter phone number of the contact to delete:");
+    if (phoneNumber) {
+        deleteContact(phoneNumber);
+    }
+});
+
+// Search contact by phone number when "Search Contact" button is clicked
+document.getElementById("searchContactBtn").addEventListener("click", function() {
+    const phoneNumber = prompt("Enter phone number to search:");
+    if (phoneNumber) {
+        searchContact(phoneNumber);
+    }
+});
+
+// Default section to show when page loads
 document.addEventListener("DOMContentLoaded", () => showSection("viewContacts"));
