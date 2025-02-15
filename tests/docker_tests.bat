@@ -13,7 +13,7 @@ timeout /t 10 /nobreak >nul
 
 :: Step 4: Run the test file for the backend API endpoints (adjust the path to the test file)
 echo Running the tests...
-go test -v C:\Users\Yonatan\Desktop\Rise\rise_project\tests\end_to_end_test.go -count=1
+go test -v . -count=1
 
 :: Optionally, you can check the exit code of the tests to decide what to do next
 if %ERRORLEVEL% equ 0 (
