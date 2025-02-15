@@ -8,10 +8,8 @@ Rise home assignment
 **Instruction for running backend:**
 1. Stop and remove all containers: "**docker-compose down -v**"
 2. Docker build: "**docker-compose up --build**" 
-  **Running Client:**
-  1. Run " " at the cmd line
-  2. Run " " url at your web browser
-  3. Test the UI by your own
+  **Usign UI:**
+  Open the index.html file by your preferred web browser
 
 **Tests:**
 local tests
