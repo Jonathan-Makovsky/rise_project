@@ -23,3 +23,22 @@ Programming languages:
 Backend - GO
 Framework - gorilla/mux
 Client - HTML, js
+
+**Project hierarchy:**
+Rise/ 
+├── src/ # Source files
+│ ├── handler.go # API handler functions for CRUD operations
+│ ├── repository.go # Database interaction functions
+├── setup/ # setup files (Docker)
+│ ├── Dockerfile
+│ ├── docker-compose.yml 
+├── database/ # complete
+│ ├── init.sql
+├── frontend/ # UI
+│ ├── index.html
+├── tests/ # Testing
+│ ├── repository_test.go
+├── main.go # Entry point for the API server and routes
+├── go.mod # Go module dependencies
+├── go.sum # Go module checksum
+├── README.md # Project documentation
