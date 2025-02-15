@@ -20,7 +20,6 @@ func TestRepository(t *testing.T) {
 }
 
 // Test adding, searching, and deleting a contact
-// Test adding, searching, and deleting a contact
 func testAddSearchDeleteContact(t *testing.T) {
     db, mock, err := sqlmock.New()
     if err != nil {
@@ -104,7 +103,7 @@ func testAddSearchDeleteContact(t *testing.T) {
         t.Fatalf("Expected 0 contacts, found %d", count)
     }
 
-    // Ensure all mock expectations were met
+    // check all mock expectations were met
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Fatalf("There were unfulfilled expectations: %s", err)
     }
@@ -127,7 +126,7 @@ func testPaginationWithMultipleContacts(t *testing.T) {
             Address:     fmt.Sprintf("%d Elm St", i),
         })
     }
-
+    // Mock the insert query
     for i, contact := range contactsToAdd {
         mock.ExpectQuery(regexp.QuoteMeta(
             "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
@@ -198,6 +197,7 @@ func testAddDeleteContacts(t *testing.T) {
     }
 
     for i, contact := range contactsToAdd {
+        // Mock the insert query
         mock.ExpectQuery(regexp.QuoteMeta(
             "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
         )).
@@ -210,7 +210,7 @@ func testAddDeleteContacts(t *testing.T) {
         }
         contactsToAdd[i].ID = id
     }
-
+    // Mock the delete query
     mock.ExpectExec(regexp.QuoteMeta(
         "DELETE FROM contacts WHERE phone_number = $1",
     )).
@@ -246,7 +246,7 @@ func testEditContact(t *testing.T) {
         PhoneNumber: "0543435590",
         Address:     "Tel Aviv",
     }
-
+    // Mock the insert query
     mock.ExpectQuery(regexp.QuoteMeta(
         "INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
     )).WithArgs(newContact.FirstName, newContact.LastName, newContact.PhoneNumber, newContact.Address).
@@ -291,7 +291,7 @@ func testEditContact(t *testing.T) {
         t.Fatalf("Expected 1 row to be updated when editing the contact, but got %d rows", rowsUpdated)
     }
 
-    // Ensure all mock expectations were met
+    // Check all mock expectations were met
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Fatalf("There were unfulfilled expectations: %s", err)
     }
