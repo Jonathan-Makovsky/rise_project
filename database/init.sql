@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS contacts (
     address TEXT
 );
 
--- Add some sample data
+-- I added some rows to the table, so we had something to work with
 INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES
     ('Jonathan', 'Makovsky', '0543435590', 'Tel Aviv'),
     ('Jonathan', 'Makovsky', '0543435590', '1'),

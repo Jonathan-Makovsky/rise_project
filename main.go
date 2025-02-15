@@ -1,5 +1,3 @@
-package main
-
 import (
 	"database/sql"
 	"log"
@@ -7,25 +5,27 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Importing PostgreSQL driver for SQL database interaction
 
-	"Rise/src"
+	"Rise/src" // Import custom source code for handlers
 )
 
 
-// CORS Middleware
+// enableCORS sets up Cross-Origin Resource Sharing (CORS) headers for all routes.
+// This allows the frontend to make requests to the backend from different domains.
 func enableCORS(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*") // Change * to your frontend URL for security
+		// Allow cross-origin requests
+        w.Header().Set("Access-Control-Allow-Origin", "*") 
         w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-        // Handle preflight requests
+        // If the request method is OPTIONS, respond with a status of 200 (OK)
         if r.Method == "OPTIONS" {
             w.WriteHeader(http.StatusOK)
             return
         }
-
+		// Otherwise, pass the request to the next handler
         next.ServeHTTP(w, r)
 	})
 }

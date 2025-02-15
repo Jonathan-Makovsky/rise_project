@@ -17,7 +17,7 @@ var paginationLock sync.Mutex
 // GetContactsHandler handles the HTTP request for retrieving contacts
 func GetContactsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const limit = 10
+		const limit = 10 // Lock to control concurrent access to pagination
 		paginationLock.Lock()
 		offset := paginationOffset
 		paginationOffset += limit
@@ -30,9 +30,10 @@ func GetContactsHandler(db *sql.DB) http.HandlerFunc {
 		}
 
 		if len(contacts) < limit {
-			paginationOffset = 0
+			paginationOffset = 0 // Reset pagination if fewer contacts are returned
 		}
-
+		
+		// Send response with contacts and any message
 		response := struct {
 			Message  string    `json:"message"`
 			Contacts []Contact `json:"contacts"`
@@ -46,7 +47,7 @@ func GetContactsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// AddContactHandler handles adding a new contact via HTTP
+// AddContactHandler handles the HTTP request for adding contact
 func AddContactHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var contact Contact
@@ -118,13 +119,13 @@ func AddContactHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// DeleteContactHandler removes a contact by phone number via HTTP
+// DeleteContactHandler handles the HTTP request for deleting contact by his exact phone number
 func DeleteContactHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		phoneNumber := vars["phone_number"]
 		if phoneNumber == "" {
-			// Instead of returning an error, return a good response
+			// Return a proper message if no phone number was provided
 			response := struct {
 				Message string `json:"message"`
 			}{
@@ -135,7 +136,7 @@ func DeleteContactHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Attempt to delete the contact
+		// Attempt to delete the contact from the db
 		rowsDeleted, err := DeleteContact(db, phoneNumber)
 		if err != nil {
 			// If no rows were deleted, it means the number is not in the phone book
@@ -149,7 +150,7 @@ func DeleteContactHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Return success message
+		// Return success message with the number of deleted contacts
 		response := struct {
 			Message string `json:"message"`
 		}{
@@ -160,7 +161,7 @@ func DeleteContactHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// SearchContactHandler retrieves all contacts with a given phone number via HTTP
+// SearchContactHandler handles the HTTP request for searching contact by his phone number
 func SearchContactHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -172,7 +173,7 @@ func SearchContactHandler(db *sql.DB) http.HandlerFunc {
 
 		contacts, err := SearchContact(db, phoneNumber)
 		if err != nil {
-			// Instead of returning an error, return a success response with an appropriate message
+			// // Return a message if no contacts are found
 			response := struct {
 				Message  string    `json:"message"`
 				Contacts []Contact `json:"contacts"`
@@ -186,7 +187,7 @@ func SearchContactHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Return the contacts along with the message
+		// Return the found contacts with a message
 		response := struct {
 			Message  string    `json:"message"`
 			Contacts []Contact `json:"contacts"`
@@ -200,13 +201,13 @@ func SearchContactHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// EditContactHandler updates a contact via HTTP
+// EditContactHandler handles the HTTP request for editing contact by his phone number
 func EditContactHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		phoneNumber := vars["phone_number"]
 		if phoneNumber == "" {
-			// Instead of returning an error, return a good response
+			// Return a message if no phone number is provided
 			response := struct {
 				Message string `json:"message"`
 			}{
@@ -219,7 +220,7 @@ func EditContactHandler(db *sql.DB) http.HandlerFunc {
 
 		var updatedContact Contact
 		if err := json.NewDecoder(r.Body).Decode(&updatedContact); err != nil {
-			// Return a good response instead of 400 error
+			// Return a message if the request body is invalid
 			response := struct {
 				Message string `json:"message"`
 			}{

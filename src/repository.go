@@ -6,7 +6,7 @@ import (
 
 )
 
-// Contact struct (matches database table columns)
+// Contact struct represents a contact entry in the database
 type Contact struct {
 	ID          int    `json:"id"`
 	FirstName   string `json:"first_name"`
@@ -17,6 +17,7 @@ type Contact struct {
 
 // GetContacts retrieves contacts with pagination from the database
 func GetContacts(db *sql.DB, limit, offset int) ([]Contact, string, error) {
+	// Query database for contacts with limit and offset
 	rows, err := db.Query(
 		"SELECT id, first_name, last_name, phone_number, address FROM contacts LIMIT $1 OFFSET $2",
 		limit, offset,
@@ -36,6 +37,7 @@ func GetContacts(db *sql.DB, limit, offset int) ([]Contact, string, error) {
 	}
 
 	message := ""
+	// If fewer contacts are returned than requested, it's the end of the table
 	if len(contacts) < limit {
 		message = "end of table, move to the start"
 	}
@@ -44,6 +46,7 @@ func GetContacts(db *sql.DB, limit, offset int) ([]Contact, string, error) {
 
 // AddContact inserts a new contact into the database
 func AddContact(db *sql.DB, contact Contact) (int, error) {
+	// Insert the contact and get the generated ID
 	err := db.QueryRow(
 		"INSERT INTO contacts (first_name, last_name, phone_number, address) VALUES ($1, $2, $3, $4) RETURNING id",
 		contact.FirstName, contact.LastName, contact.PhoneNumber, contact.Address,
@@ -57,11 +60,12 @@ func AddContact(db *sql.DB, contact Contact) (int, error) {
 
 // DeleteContact removes a contact by phone number and returns the number of deleted rows
 func DeleteContact(db *sql.DB, phoneNumber string) (int, error) {
+	// Delete contact by phone number
 	result, err := db.Exec("DELETE FROM contacts WHERE phone_number = $1", phoneNumber)
 	if err != nil {
 		return 0, err
 	}
-
+	// Get the number of rows deleted
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return 0, err
@@ -74,6 +78,7 @@ func DeleteContact(db *sql.DB, phoneNumber string) (int, error) {
 
 // SearchContact retrieves all contacts with the given phone number
 func SearchContact(db *sql.DB, phoneNumber string) ([]Contact, error) {
+	// Query database for contacts with the given phone number
 	rows, err := db.Query(
 		"SELECT id, first_name, last_name, phone_number, address FROM contacts WHERE phone_number = $1",
 		phoneNumber,
@@ -91,7 +96,7 @@ func SearchContact(db *sql.DB, phoneNumber string) ([]Contact, error) {
 		}
 		contacts = append(contacts, contact)
 	}
-
+	// Return an error if no contacts are found
 	if len(contacts) == 0 {
 		return nil, fmt.Errorf("no contacts found")
 	}
@@ -101,6 +106,7 @@ func SearchContact(db *sql.DB, phoneNumber string) ([]Contact, error) {
 
 // EditContact updates an existing contact based on the provided phone number
 func EditContact(db *sql.DB, phoneNumber string, updatedContact Contact) (int, error) {
+	// Update contact's details based on phone number
 	result, err := db.Exec(
 		"UPDATE contacts SET first_name = $1, last_name = $2, phone_number = $3, address = $4 WHERE phone_number = $5",
 		updatedContact.FirstName, updatedContact.LastName, updatedContact.PhoneNumber, updatedContact.Address, phoneNumber,
@@ -108,7 +114,7 @@ func EditContact(db *sql.DB, phoneNumber string, updatedContact Contact) (int, e
 	if err != nil {
 		return 0, err
 	}
-
+	// Get the number of rows affected (updated)
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return 0, err
