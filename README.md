@@ -23,8 +23,8 @@ To run unit tests for the repository functions, run:
 **go test tests/repository_test.go**    
 
 End-to-End Tests:  
-windows: **cd tests**. run **.\docker_tests.bat**
-linux: **bash /tests/linux_docker.tests.bash** 
+windows: **cd tests**. run **.\docker_tests.bat**  
+linux: **bash /tests/linux_docker.tests.bash**    
 
 **Programming Languages and Technologies**  
 Backend: Go (Golang)  
