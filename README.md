@@ -15,7 +15,7 @@ Build and start the application containers with:
 **docker-compose up --build**    
 
 Access the UI:  
-Open the **index.html** file in your preferred web browser to interact with the frontend.    
+After running the docker, Open the **index.html** file in your preferred web browser to interact with the frontend.    
 
 **Tests**  
 Local Tests:  
