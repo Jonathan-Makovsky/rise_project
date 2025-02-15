@@ -1,6 +1,10 @@
 # rise_project
 Rise home assignment
 
+
+**Installations:**
+1. Docker application
+
 **Instruction for running backend:**
 1. Stop and remove all containers: "**docker-compose down -v**"
 2. Docker build: "**docker-compose up --build**" 
