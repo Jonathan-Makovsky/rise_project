@@ -48,7 +48,7 @@ Rise/
 │ ├── repository_test.go # Unit tests for repository functions  
 │ ├── docker_tests.bat # Batch script to run Docker and tests  
 │ ├── end_to_end_test.go # End-to-end tests for API functionality  
-│ └── linux_docker_tests.bash # New bash script for running Docker tests  
+│ └── linux_docker_tests.bash # Bash script to run Docker and tests  
 ├── main.go # Entry point for the API server and routes  
 ├── go.mod # Go module dependencies  
 ├── go.sum # Go module checksum  
